@@ -1,124 +1,222 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NovaVM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaVM — Virtual PC</title>
+
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
       min-height: 100vh;
-      padding: 24px;
-      display: grid;
-      place-items: center;
-      background: #080c16;
-      color: #eef3ff;
-      font-family: system-ui, sans-serif;
-    }
-
-    main {
-      width: min(1000px, 100%);
-      background: #101827;
-      border: 1px solid #273650;
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 25px 80px #0008;
+      background: #090d18;
+      color: #eef2ff;
+      font-family: Arial, sans-serif;
     }
 
     header {
-      padding: 20px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      border-bottom: 1px solid #273650;
+      gap: 16px;
+      padding: 18px 24px;
+      border-bottom: 1px solid #263149;
+      background: #101729;
     }
 
-    h1 { margin: 0; font-size: 24px; }
-    .status { color: #aab8d0; font-size: 13px; }
-    .content { padding: 24px; }
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
 
-    .screen {
-      min-height: 320px;
+    header p {
+      margin: 5px 0 0;
+      color: #aab6cf;
+      font-size: 13px;
+    }
+
+    main {
+      width: min(1200px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .panel {
       padding: 20px;
-      display: grid;
-      place-items: center;
-      text-align: center;
-      background: #05080e;
-      border: 1px solid #30415e;
-      border-radius: 12px;
-      overflow: auto;
+      border: 1px solid #293650;
+      border-radius: 14px;
+      background: #111a2c;
+    }
+
+    #status {
+      color: #8de0bd;
+      margin: 0 0 8px;
+    }
+
+    #message {
+      color: #b9c4da;
+      margin: 0 0 18px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      padding: 11px 16px;
+      border: 1px solid #405273;
+      border-radius: 8px;
+      background: #233451;
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #30466b;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    #start {
+      background: #2563eb;
+      border-color: #3b82f6;
+    }
+
+    #start:hover {
+      background: #1d4ed8;
+    }
+
+    #vm {
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid #34415b;
+      border-radius: 10px;
+      background: #000;
     }
 
     #screen_container {
       width: 100%;
-      color: #fff;
-      text-align: left;
+      min-height: 300px;
+      background: #000;
       overflow: auto;
     }
 
-    #screen_container > div {
+    #screen_container .screen {
       white-space: pre;
-      font: 14px monospace;
-      line-height: 14px;
+      font-family: monospace;
+      line-height: 1;
     }
 
     #screen_container canvas {
       max-width: 100%;
-      height: auto;
-      image-rendering: pixelated;
     }
 
-    button {
-      padding: 12px 18px;
+    #placeholder {
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      color: #93a4c1;
+    }
+
+    #vm:fullscreen {
+      width: 100%;
+      height: 100%;
       border: 0;
-      border-radius: 9px;
-      background: #7c6cff;
-      color: white;
-      font-size: 15px;
-      cursor: pointer;
+      border-radius: 0;
+      display: flex;
+      flex-direction: column;
+      background: #000;
     }
 
-    button:disabled { opacity: .6; cursor: wait; }
-    p { color: #aab8d0; line-height: 1.6; }
-    .note { font-size: 13px; }
+    #vm:fullscreen #screen_container {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    #vm:fullscreen #screen_container canvas {
+      max-width: 100%;
+    }
+
+    .footer {
+      margin-top: 16px;
+      color: #8291ad;
+      font-size: 12px;
+    }
+
+    @media (max-width: 600px) {
+      main {
+        padding: 12px;
+      }
+
+      header {
+        padding: 16px;
+      }
+
+      .panel {
+        padding: 12px;
+      }
+    }
   </style>
 </head>
-<body>
-  <main>
-    <header>
-      <h1>✦ NovaVM</h1>
-      <span class="status" id="status">VM offline</span>
-    </header>
 
-    <section class="content">
-      <div class="screen">
+<body>
+  <header>
+    <div>
+      <h1>NovaVM</h1>
+      <p>Your virtual PC in the browser</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <p id="status">Virtual PC stopped</p>
+      <p id="message">Press Boot NovaVM to start KolibriOS.</p>
+
+      <div class="controls">
+        <button id="start" type="button">Boot NovaVM</button>
+        <button id="fullscreenBtn" type="button">
+          ⛶ Fullscreen
+        </button>
+      </div>
+
+      <div id="vm">
         <div id="placeholder">
-          <div style="font-size:48px">▣</div>
-          <h2>Your virtual computer</h2>
-          <p id="message">
-            Start NovaVM to load the browser-based emulator.
-          </p>
-          <button id="start">Boot NovaVM</button>
-          <p class="note">Browser-powered · No software installation</p>
+          <div>
+            <h2>NovaVM</h2>
+            <p>Your virtual PC will appear here.</p>
+          </div>
         </div>
-        <button id="fullscreenBtn" type="button">⛶ Fullscreen</button>
+
         <div id="screen_container" hidden>
-          <div></div>
-          <canvas style="display:none"></canvas>
+          <div class="screen"></div>
+          <canvas style="display: none"></canvas>
         </div>
       </div>
 
-      <p class="note">
-        NovaVM runs a guest operating system using your browser's
-        processing power. Initial boot may take some time.
+      <p class="footer">
+        Browser-powered · No software installation
       </p>
     </section>
   </main>
 
-  <script src="vm.js"></script>
+  <script src="./vm.js"></script>
 </body>
 </html>
+```
