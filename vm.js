@@ -1,4 +1,3 @@
-```javascript
 const startButton = document.getElementById("start");
 const fullscreenBtn = document.getElementById("fullscreenBtn");
 const mouseBtn = document.getElementById("mouseBtn");
@@ -44,8 +43,7 @@ mouseBtn.addEventListener("click", () => {
   try {
     if (typeof emulator.lock_mouse === "function") {
       emulator.lock_mouse();
-      message.textContent =
-        "Mouse lock requested. Your browser may require permission.";
+      message.textContent = "Mouse lock requested.";
     } else {
       message.textContent =
         "Mouse locking is not supported by this v86 build.";
@@ -121,4 +119,3 @@ startButton.addEventListener("click", async () => {
     loading = false;
   }
 });
-```
