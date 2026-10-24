@@ -6,9 +6,7 @@
   <title>NovaVM - Virtual PC</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -23,14 +21,8 @@
       border-bottom: 1px solid #293650;
     }
 
-    header h1 {
-      margin: 0 0 6px;
-    }
-
-    header p {
-      margin: 0;
-      color: #b9c4da;
-    }
+    header h1 { margin: 0 0 6px; }
+    header p { margin: 0; color: #b9c4da; }
 
     main {
       max-width: 1400px;
@@ -63,65 +55,66 @@
       font-weight: bold;
     }
 
-    button:hover {
-      background: #344969;
-    }
+    button:hover { background: #344969; }
+    #start { background: #2563eb; }
+    button:disabled { opacity: 0.6; cursor: wait; }
 
-    #start {
-      background: #2563eb;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: wait;
-    }
-
-    #status {
-      color: #8de0bd;
-      font-weight: bold;
-    }
-
-    #message {
-      color: #b9c4da;
-    }
+    #status { color: #8de0bd; font-weight: bold; }
+    #message { color: #b9c4da; }
 
     #vm {
       width: 100%;
-      min-width: 0;
+      height: min(70vh, 800px);
+      min-height: 350px;
       background: #000;
       border: 1px solid #34415b;
       border-radius: 8px;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .vm-toolbar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 12px;
+      background: #101729;
+      color: white;
     }
 
     #screen_container {
+      flex: 1 1 auto;
       width: 100%;
+      height: 100%;
+      min-height: 0;
       min-width: 0;
-      min-height: 300px;
       background: #000;
       overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: relative;
     }
 
     #screen_container .screen {
+      width: 100%;
+      height: 100%;
       white-space: pre;
       font: 14px monospace;
       line-height: 14px;
     }
 
     #screen_container canvas {
-      display: block;
-      max-width: 100%;
-      max-height: 100%;
-      width: auto;
-      height: auto;
-      object-fit: contain;
+      display: block !important;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none !important;
+      max-height: none !important;
+      object-fit: fill !important;
     }
 
     #placeholder {
-      min-height: 300px;
+      flex: 1;
       padding: 20px;
       display: flex;
       align-items: center;
@@ -135,15 +128,12 @@
       display: none !important;
     }
 
-    .note {
-      color: #8291ad;
-      font-size: 13px;
-    }
+    .note { color: #8291ad; font-size: 13px; }
 
-    /* Fullscreen computer layout */
     #vm:fullscreen {
       width: 100vw;
       height: 100vh;
+      min-height: 0;
       max-width: none;
       margin: 0;
       padding: 0;
@@ -154,52 +144,22 @@
       background: #000;
     }
 
-    #vm:fullscreen .vm-toolbar {
-      flex: 0 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 10px 14px;
-      background: #101729;
-      color: white;
-    }
-
     #vm:fullscreen #screen_container {
       flex: 1 1 auto;
       width: 100%;
       height: 100%;
       min-height: 0;
-      overflow: hidden;
     }
 
     #vm:fullscreen #screen_container canvas {
-      max-width: 100%;
-      max-height: 100%;
-      width: auto;
-      height: auto;
-    }
-
-    #vm:fullscreen #placeholder {
-      flex: 1;
+      width: 100% !important;
+      height: 100% !important;
     }
 
     @media (max-width: 600px) {
-      main {
-        padding: 10px;
-      }
-
-      .panel {
-        padding: 10px;
-      }
-
-      header {
-        padding: 14px;
-      }
-
-      #vm:fullscreen .vm-toolbar {
-        padding: 8px;
-      }
+      main { padding: 10px; }
+      .panel { padding: 10px; }
+      header { padding: 14px; }
     }
   </style>
 </head>
@@ -224,9 +184,7 @@
       <div id="vm">
         <div class="vm-toolbar">
           <strong>NovaVM Virtual PC</strong>
-          <button id="exitFullscreenBtn" type="button">
-            Exit Fullscreen
-          </button>
+          <button id="exitFullscreenBtn" type="button">Exit Fullscreen</button>
         </div>
 
         <div id="placeholder">
@@ -242,9 +200,7 @@
         </div>
       </div>
 
-      <p class="note">
-        Press Esc to leave fullscreen. No software installation required.
-      </p>
+      <p class="note">Press Esc to exit fullscreen.</p>
     </section>
   </main>
 
