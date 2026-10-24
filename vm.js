@@ -10,7 +10,7 @@ const vmContainer = document.getElementById("vm");
 let emulator = null;
 let loading = false;
 
-// Fullscreen includes the virtual PC and its controls.
+// Fullscreen using the browser's fullscreen API.
 fullscreenBtn.addEventListener("click", async () => {
   try {
     if (document.fullscreenElement) {
@@ -19,9 +19,9 @@ fullscreenBtn.addEventListener("click", async () => {
       await vmContainer.requestFullscreen();
     }
   } catch (error) {
-    console.error("NovaVM fullscreen error:", error);
+    console.error("Fullscreen error:", error);
     message.textContent =
-      "Fullscreen was blocked by your browser. Try clicking again.";
+      "Fullscreen failed. Try refreshing the page and clicking again.";
   }
 });
 
@@ -29,6 +29,19 @@ document.addEventListener("fullscreenchange", () => {
   fullscreenBtn.textContent = document.fullscreenElement
     ? "✕ Exit Fullscreen"
     : "⛶ Fullscreen";
+});
+
+// Ask the browser to capture the mouse when the VM is clicked.
+screenContainer.addEventListener("click", () => {
+  if (!emulator) return;
+
+  try {
+    if (typeof emulator.lock_mouse === "function") {
+      emulator.lock_mouse();
+    }
+  } catch (error) {
+    console.warn("Mouse lock unavailable:", error);
+  }
 });
 
 startButton.addEventListener("click", async () => {
@@ -75,12 +88,13 @@ startButton.addEventListener("click", async () => {
 
     emulator.add_listener("emulator-started", () => {
       status.textContent = "Virtual PC running";
-      message.textContent = "KolibriOS is starting.";
+      message.textContent =
+        "KolibriOS is starting. Click inside the screen to use the mouse.";
     });
 
     emulator.add_listener("emulator-ready", () => {
       status.textContent = "Emulator ready";
-      message.textContent = "Your virtual PC is ready to use.";
+      message.textContent = "Your virtual PC is ready.";
     });
 
   } catch (error) {
