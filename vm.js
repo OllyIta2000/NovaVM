@@ -42,7 +42,7 @@ startButton.addEventListener("click", async () => {
       screen_container: screenContainer,
       bios: { url: "./seabios.bin" },
       vga_bios: { url: "./vgabios.bin" },
-      fda: {
+      hda: {
         url: "/NovaVM/kolibri.img",
         async: false
       },
