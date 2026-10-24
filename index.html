@@ -1,114 +1,74 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NovaVM — Virtual PC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NovaVM - Virtual PC</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      min-height: 100vh;
       background: #090d18;
       color: #eef2ff;
       font-family: Arial, sans-serif;
     }
 
     header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 18px 24px;
-      border-bottom: 1px solid #263149;
+      padding: 20px 24px;
       background: #101729;
+      border-bottom: 1px solid #293650;
     }
 
-    header h1 {
-      margin: 0;
-      font-size: 24px;
-    }
-
-    header p {
-      margin: 5px 0 0;
-      color: #aab6cf;
-      font-size: 13px;
-    }
+    header h1 { margin: 0; }
 
     main {
-      width: min(1200px, 100%);
-      margin: 0 auto;
+      max-width: 1200px;
+      margin: auto;
       padding: 24px;
     }
 
     .panel {
       padding: 20px;
-      border: 1px solid #293650;
-      border-radius: 14px;
       background: #111a2c;
-    }
-
-    #status {
-      color: #8de0bd;
-      margin: 0 0 8px;
-    }
-
-    #message {
-      color: #b9c4da;
-      margin: 0 0 18px;
+      border: 1px solid #293650;
+      border-radius: 12px;
     }
 
     .controls {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-bottom: 16px;
+      margin: 16px 0;
     }
 
     button {
-      padding: 11px 16px;
+      padding: 12px 18px;
+      color: white;
+      background: #233451;
       border: 1px solid #405273;
       border-radius: 8px;
-      background: #233451;
-      color: white;
-      font-size: 14px;
-      font-weight: bold;
       cursor: pointer;
+      font-weight: bold;
     }
 
-    button:hover {
-      background: #30466b;
-    }
+    button:hover { background: #30466b; }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: wait;
-    }
+    #start { background: #2563eb; }
 
-    #start {
-      background: #2563eb;
-      border-color: #3b82f6;
-    }
+    #status { color: #8de0bd; }
 
-    #start:hover {
-      background: #1d4ed8;
-    }
+    #message { color: #b9c4da; }
 
     #vm {
-      width: 100%;
-      overflow: hidden;
-      border: 1px solid #34415b;
-      border-radius: 10px;
       background: #000;
+      border: 1px solid #34415b;
+      border-radius: 8px;
+      overflow: auto;
     }
 
     #screen_container {
-      width: 100%;
       min-height: 300px;
       background: #000;
       overflow: auto;
@@ -127,9 +87,8 @@
     #placeholder {
       min-height: 300px;
       display: flex;
-      align-items: center;
       justify-content: center;
-      padding: 24px;
+      align-items: center;
       text-align: center;
       color: #93a4c1;
     }
@@ -141,47 +100,31 @@
       border-radius: 0;
       display: flex;
       flex-direction: column;
+      overflow: auto;
       background: #000;
     }
 
     #vm:fullscreen #screen_container {
       flex: 1;
       min-height: 0;
-      overflow: auto;
     }
 
-    #vm:fullscreen #screen_container canvas {
-      max-width: 100%;
-    }
-
-    .footer {
-      margin-top: 16px;
+    .note {
       color: #8291ad;
-      font-size: 12px;
+      font-size: 13px;
     }
 
     @media (max-width: 600px) {
-      main {
-        padding: 12px;
-      }
-
-      header {
-        padding: 16px;
-      }
-
-      .panel {
-        padding: 12px;
-      }
+      main { padding: 12px; }
+      .panel { padding: 12px; }
     }
   </style>
 </head>
 
 <body>
   <header>
-    <div>
-      <h1>NovaVM</h1>
-      <p>Your virtual PC in the browser</p>
-    </div>
+    <h1>NovaVM</h1>
+    <p>Browser-powered virtual PC</p>
   </header>
 
   <main>
@@ -191,9 +134,7 @@
 
       <div class="controls">
         <button id="start" type="button">Boot NovaVM</button>
-        <button id="fullscreenBtn" type="button">
-          ⛶ Fullscreen
-        </button>
+        <button id="fullscreenBtn" type="button">⛶ Fullscreen</button>
       </div>
 
       <div id="vm">
@@ -206,17 +147,14 @@
 
         <div id="screen_container" hidden>
           <div class="screen"></div>
-          <canvas style="display: none"></canvas>
+          <canvas style="display:none"></canvas>
         </div>
       </div>
 
-      <p class="footer">
-        Browser-powered · No software installation
-      </p>
+      <p class="note">No software installation required.</p>
     </section>
   </main>
 
   <script src="./vm.js"></script>
 </body>
 </html>
-```
