@@ -1,0 +1,108 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NovaVM</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #080c16;
+      color: #eef3ff;
+      font-family: system-ui, sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+    main {
+      width: min(900px, 100%);
+      border: 1px solid #273650;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #101827;
+      box-shadow: 0 25px 80px #0008;
+    }
+    header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #273650;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    h1 { margin: 0; font-size: 24px; }
+    .status { color: #91a4c3; font-size: 13px; }
+    .content { padding: 24px; }
+    .screen {
+      min-height: 300px;
+      border: 1px solid #30415e;
+      border-radius: 12px;
+      background: #05080e;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 24px;
+    }
+    .symbol { font-size: 54px; }
+    h2 { margin-bottom: 8px; }
+    p { color: #aab8d0; line-height: 1.6; }
+    button {
+      background: #7c6cff;
+      color: white;
+      border: 0;
+      border-radius: 9px;
+      padding: 12px 18px;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    button:hover { background: #9588ff; }
+    button:focus-visible { outline: 2px solid white; }
+    .note { font-size: 13px; margin-top: 18px; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>✦ NovaVM</h1>
+      <span class="status" id="status">VM offline</span>
+    </header>
+
+    <section class="content">
+      <div class="screen">
+        <div>
+          <div class="symbol">▣</div>
+          <h2>Your virtual computer</h2>
+          <p id="message">
+            NovaVM is ready to connect to a browser-based PC emulator.
+          </p>
+          <button id="start">Initialize NovaVM</button>
+          <p class="note">
+            Browser-powered · No local software installation
+          </p>
+        </div>
+      </div>
+      <p>
+        Next: connect a real x86 emulator and boot a compatible
+        Linux system from an online image.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const button = document.getElementById("start");
+    const status = document.getElementById("status");
+    const message = document.getElementById("message");
+
+    button.addEventListener("click", () => {
+      status.textContent = "Emulator not connected";
+      message.textContent =
+        "The NovaVM interface works! The real emulator is our next step.";
+      button.textContent = "Interface ready";
+      button.disabled = true;
+    });
+  </script>
+</body>
+</html>
