@@ -13,8 +13,8 @@ startButton.addEventListener("click", async () => {
 
   loading = true;
   startButton.disabled = true;
-  status.textContent = "Loading emulator...";
-  message.textContent = "Preparing NovaVM...";
+  status.textContent = "Loading NovaVM...";
+  message.textContent = "Preparing the virtual PC.";
 
   try {
     if (!window.V86) {
@@ -23,14 +23,17 @@ startButton.addEventListener("click", async () => {
         script.src = "./libv86.js";
         script.onload = resolve;
         script.onerror = () =>
-          reject(new Error("Could not load local libv86.js."));
+          reject(new Error("Could not load libv86.js."));
         document.head.appendChild(script);
       });
     }
 
+    if (!window.V86) {
+      throw new Error("The v86 constructor was not found.");
+    }
+
     placeholder.hidden = true;
     screenContainer.hidden = false;
-    status.textContent = "Starting virtual PC...";
 
     emulator = new window.V86({
       wasm_path: "/NovaVM/v86.wasm",
@@ -39,13 +42,20 @@ startButton.addEventListener("click", async () => {
       screen_container: screenContainer,
       bios: { url: "./seabios.bin" },
       vga_bios: { url: "./vgabios.bin" },
-      autostart: false
+      cdrom: {
+        url: "https://raw.githubusercontent.com/copy/images/db92d8fd4a53dbd73b8e0588bb4bd8fe37a1975a/linux.iso",
+        async: false
+      },
+      autostart: true
+    });
+
+    emulator.add_listener("emulator-started", () => {
+      status.textContent = "Virtual PC running";
+      message.textContent = "NovaVM is starting Linux...";
     });
 
     emulator.add_listener("emulator-ready", () => {
       status.textContent = "Emulator ready";
-      message.textContent =
-        "The emulator is ready, but a Linux disk image is still needed.";
     });
 
   } catch (error) {
