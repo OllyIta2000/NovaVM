@@ -42,12 +42,11 @@ startButton.addEventListener("click", async () => {
       screen_container: screenContainer,
       bios: { url: "./seabios.bin" },
       vga_bios: { url: "./vgabios.bin" },
-      hda: {
+      fda: {
         url: "/NovaVM/kolibri.img",
         async: false
       },
-    boot_order: 0x231,
-    autostart: true
+      boot_order: 0x231,
       autostart: true
     });
 
