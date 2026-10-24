@@ -1,160 +1,125 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NovaVM - Virtual PC</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NovaVM</title>
+<style>
+* { box-sizing: border-box; }
 
-  <style>
-    * { box-sizing: border-box; }
+body {
+margin: 0;
+min-height: 100vh;
+padding: 24px;
+display: grid;
+place-items: center;
+background: #080c16;
+color: #eef3ff;
+font-family: system-ui, sans-serif;
+}
 
-    body {
-      margin: 0;
-      background: #090d18;
-      color: #eef2ff;
-      font-family: Arial, sans-serif;
-    }
+main {
+width: min(1000px, 100%);
+background: #101827;
+border: 1px solid #273650;
+border-radius: 18px;
+overflow: hidden;
+box-shadow: 0 25px 80px #0008;
+}
 
-    header {
-      padding: 20px 24px;
-      background: #101729;
-      border-bottom: 1px solid #293650;
-    }
+header {
+padding: 20px 24px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 12px;
+border-bottom: 1px solid #273650;
+}
 
-    header h1 { margin: 0; }
+h1 { margin: 0; font-size: 24px; }
+.status { color: #aab8d0; font-size: 13px; }
+.content { padding: 24px; }
 
-    main {
-      max-width: 1200px;
-      margin: auto;
-      padding: 24px;
-    }
+.screen {
+min-height: 320px;
+padding: 20px;
+display: grid;
+place-items: center;
+text-align: center;
+background: #05080e;
+border: 1px solid #30415e;
+border-radius: 12px;
+overflow: auto;
+}
 
-    .panel {
-      padding: 20px;
-      background: #111a2c;
-      border: 1px solid #293650;
-      border-radius: 12px;
-    }
+#screen_container {
+width: 100%;
+color: #fff;
+text-align: left;
+overflow: auto;
+}
 
-    .controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 16px 0;
-    }
+#screen_container > div {
+white-space: pre;
+font: 14px monospace;
+line-height: 14px;
+}
 
-    button {
-      padding: 12px 18px;
-      color: white;
-      background: #233451;
-      border: 1px solid #405273;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+#screen_container canvas {
+max-width: 100%;
+height: auto;
+image-rendering: pixelated;
+}
 
-    button:hover { background: #30466b; }
+button {
+padding: 12px 18px;
+border: 0;
+border-radius: 9px;
+background: #7c6cff;
+color: white;
+font-size: 15px;
+cursor: pointer;
+}
 
-    #start { background: #2563eb; }
-
-    #status { color: #8de0bd; }
-
-    #message { color: #b9c4da; }
-
-    #vm {
-      background: #000;
-      border: 1px solid #34415b;
-      border-radius: 8px;
-      overflow: auto;
-    }
-
-    #screen_container {
-      min-height: 300px;
-      background: #000;
-      overflow: auto;
-    }
-
-    #screen_container .screen {
-      white-space: pre;
-      font-family: monospace;
-      line-height: 1;
-    }
-
-    #screen_container canvas {
-      max-width: 100%;
-    }
-
-    #placeholder {
-      min-height: 300px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      color: #93a4c1;
-    }
-
-    #vm:fullscreen {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      border-radius: 0;
-      display: flex;
-      flex-direction: column;
-      overflow: auto;
-      background: #000;
-    }
-
-    #vm:fullscreen #screen_container {
-      flex: 1;
-      min-height: 0;
-    }
-
-    .note {
-      color: #8291ad;
-      font-size: 13px;
-    }
-
-    @media (max-width: 600px) {
-      main { padding: 12px; }
-      .panel { padding: 12px; }
-    }
-  </style>
+button:disabled { opacity: .6; cursor: wait; }
+p { color: #aab8d0; line-height: 1.6; }
+.note { font-size: 13px; }
+</style>
 </head>
-
 <body>
-  <header>
-    <h1>NovaVM</h1>
-    <p>Browser-powered virtual PC</p>
-  </header>
+<main>
+<header>
+<h1>✦ NovaVM</h1>
+<span class="status" id="status">VM offline</span>
+</header>
 
-  <main>
-    <section class="panel">
-      <p id="status">Virtual PC stopped</p>
-      <p id="message">Press Boot NovaVM to start KolibriOS.</p>
+<section class="content">
+<div class="screen">
+<div id="placeholder">
+<div style="font-size:48px">▣</div>
+<h2>Your virtual computer</h2>
+<p id="message">
+Start NovaVM to load the browser-based emulator.
+</p>
+<button id="start">Boot NovaVM</button>
+<p class="note">Browser-powered · No software installation</p>
+</div>
 
-      <div class="controls">
-        <button id="start" type="button">Boot NovaVM</button>
         <button id="fullscreenBtn" type="button">⛶ Fullscreen</button>
-      </div>
+<div id="screen_container" hidden>
+<div></div>
+<canvas style="display:none"></canvas>
+</div>
+</div>
 
-      <div id="vm">
-        <div id="placeholder">
-          <div>
-            <h2>NovaVM</h2>
-            <p>Your virtual PC will appear here.</p>
-          </div>
-        </div>
+<p class="note">
+NovaVM runs a guest operating system using your browser's
+processing power. Initial boot may take some time.
+</p>
+</section>
+</main>
 
-        <div id="screen_container" hidden>
-          <div class="screen"></div>
-          <canvas style="display:none"></canvas>
-        </div>
-      </div>
-
-      <p class="note">No software installation required.</p>
-    </section>
-  </main>
-
-  <script src="./vm.js"></script>
+<script src="vm.js"></script>
 </body>
 </html>
