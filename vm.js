@@ -24,16 +24,12 @@ function showError(error) {
   setStatus("Startup failed");
   setMessage(error?.message || String(error));
 
-  if (placeholder) placeholder.hidden = false;
-  if (screenContainer) screenContainer.hidden = true;
-
+  placeholder.hidden = false;
+  screenContainer.hidden = true;
   emulator = null;
   loading = false;
-
-  if (startButton) {
-    startButton.disabled = false;
-    startButton.textContent = "Retry boot";
-  }
+  startButton.disabled = false;
+  startButton.textContent = "Retry boot";
 }
 
 async function loadV86() {
@@ -43,9 +39,7 @@ async function loadV86() {
     const script = document.createElement("script");
     script.src = "./libv86.js";
     script.onload = resolve;
-    script.onerror = () => {
-      reject(new Error("Could not load libv86.js."));
-    };
+    script.onerror = () => reject(new Error("Could not load libv86.js."));
     document.head.appendChild(script);
   });
 
@@ -58,19 +52,16 @@ async function bootNovaVM() {
   if (loading || emulator) return;
 
   loading = true;
-
   startButton.disabled = true;
   startButton.textContent = "Starting...";
   setStatus("Loading NovaVM...");
-  setMessage("Loading the emulator library.");
+  setMessage("Preparing KolibriOS.");
 
   try {
     await loadV86();
 
     placeholder.hidden = true;
     screenContainer.hidden = false;
-
-    setMessage("Starting KolibriOS...");
 
     emulator = new window.V86({
       wasm_path: "./v86.wasm",
@@ -101,16 +92,13 @@ async function bootNovaVM() {
     showError(error);
   } finally {
     loading = false;
-
-    if (!emulator) {
-      startButton.disabled = false;
-    }
+    if (!emulator) startButton.disabled = false;
   }
 }
 
 startButton.addEventListener("click", bootNovaVM);
 
-async function enterFullscreen() {
+async function toggleFullscreen() {
   try {
     if (!emulator) {
       setMessage("Boot NovaVM before using fullscreen.");
@@ -122,13 +110,26 @@ async function enterFullscreen() {
     } else {
       await vmContainer.requestFullscreen();
     }
+
+    resizeScreen();
   } catch (error) {
     console.error("Fullscreen error:", error);
     setMessage("Fullscreen failed: " + error.message);
   }
 }
 
-fullscreenBtn.addEventListener("click", enterFullscreen);
+function resizeScreen() {
+  const canvas = screenContainer.querySelector("canvas");
+  if (!canvas || screenContainer.hidden) return;
+
+  canvas.style.setProperty("width", "100%", "important");
+  canvas.style.setProperty("height", "100%", "important");
+  canvas.style.setProperty("max-width", "none", "important");
+  canvas.style.setProperty("max-height", "none", "important");
+}
+
+fullscreenBtn.addEventListener("click", toggleFullscreen);
+
 exitFullscreenBtn.addEventListener("click", async () => {
   if (document.fullscreenElement) {
     await document.exitFullscreen();
@@ -136,17 +137,17 @@ exitFullscreenBtn.addEventListener("click", async () => {
 });
 
 document.addEventListener("fullscreenchange", () => {
-  const isFullscreen = Boolean(document.fullscreenElement);
-
-  fullscreenBtn.textContent = isFullscreen
-    ? "Exit Fullscreen"
-    : "⛶ Fullscreen";
-
-  exitFullscreenBtn.style.display = isFullscreen ? "inline-block" : "none";
+  const active = Boolean(document.fullscreenElement);
+  fullscreenBtn.textContent = active ? "Exit Fullscreen" : "⛶ Fullscreen";
+  exitFullscreenBtn.style.display = active ? "inline-block" : "none";
+  requestAnimationFrame(resizeScreen);
 });
 
-/* Hide the fullscreen exit button until fullscreen is active. */
 exitFullscreenBtn.style.display = "none";
+
+window.addEventListener("resize", () => {
+  requestAnimationFrame(resizeScreen);
+});
 
 mouseBtn.addEventListener("click", () => {
   if (!emulator) {
@@ -156,9 +157,9 @@ mouseBtn.addEventListener("click", () => {
 
   if (typeof emulator.lock_mouse === "function") {
     emulator.lock_mouse();
-    setMessage("Mouse lock requested. Press Esc if the browser allows it.");
+    setMessage("Mouse lock requested.");
   } else {
-    setMessage("Mouse locking is not supported by this version.");
+    setMessage("Mouse locking is not supported.");
   }
 });
 
@@ -168,10 +169,7 @@ window.addEventListener("error", (event) => {
 
 window.addEventListener("unhandledrejection", (event) => {
   console.error("NovaVM loading error:", event.reason);
-  setMessage(
-    "Loading error: " +
-    (event.reason?.message || String(event.reason))
-  );
+  setMessage("Loading error: " + (event.reason?.message || String(event.reason)));
 });
 
 console.log("NovaVM: vm.js loaded.");
