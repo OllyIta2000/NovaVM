@@ -43,7 +43,7 @@ startButton.addEventListener("click", async () => {
       bios: { url: "./seabios.bin" },
       vga_bios: { url: "./vgabios.bin" },
       cdrom: {
-        url: "https://raw.githubusercontent.com/copy/images/db92d8fd4a53dbd73b8e0588bb4bd8fe37a1975a/linux.iso",
+        url: "https://i.copy.sh/linux.iso",
         async: false
       },
       autostart: true
