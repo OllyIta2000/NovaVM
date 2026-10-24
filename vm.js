@@ -46,6 +46,8 @@ startButton.addEventListener("click", async () => {
         url: "/NovaVM/kolibri.img",
         async: false
       },
+    boot_order: 0x231,
+    autostart: true
       autostart: true
     });
 
