@@ -10,102 +10,174 @@ const vmContainer = document.getElementById("vm");
 let emulator = null;
 let loading = false;
 
-function showError(error) {
-  console.error("NovaVM error:", error);
-  status.textContent = "Startup failed";
-  message.textContent = error?.message || String(error);
-  startButton.disabled = false;
-  startButton.textContent = "Retry boot";
-  placeholder.hidden = false;
-  screenContainer.hidden = true;
-  emulator = null;
+function setStatus(text) {
+  if (status) status.textContent = text;
 }
 
-startButton.addEventListener("click", async () => {
+function setMessage(text) {
+  if (message) message.textContent = text;
+}
+
+function showError(error) {
+  console.error("NovaVM startup error:", error);
+  setStatus("Startup failed");
+  setMessage(error?.message || String(error));
+
+  if (placeholder) placeholder.hidden = false;
+  if (screenContainer) screenContainer.hidden = true;
+
+  emulator = null;
+  loading = false;
+
+  if (startButton) {
+    startButton.disabled = false;
+    startButton.textContent = "Retry boot";
+  }
+}
+
+async function loadV86() {
+  if (typeof window.V86 === "function") return;
+
+  await new Promise((resolve, reject) => {
+    const existingScript = document.querySelector(
+      'script[src*="libv86.js"]'
+    );
+
+    if (existingScript) {
+      existingScript.addEventListener("load", resolve, { once: true });
+      existingScript.addEventListener(
+        "error",
+        () => reject(new Error("Could not load libv86.js.")),
+        { once: true }
+      );
+
+      if (typeof window.V86 === "function") resolve();
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "./libv86.js";
+    script.onload = resolve;
+    script.onerror = () =>
+      reject(new Error("Could not load libv86.js."));
+
+    document.head.appendChild(script);
+  });
+
+  if (typeof window.V86 !== "function") {
+    throw new Error(
+      "libv86.js loaded, but the V86 constructor was not found."
+    );
+  }
+}
+
+async function bootNovaVM() {
   if (loading || emulator) return;
 
   loading = true;
-  startButton.disabled = true;
-  status.textContent = "Loading NovaVM...";
-  message.textContent = "Preparing KolibriOS.";
+
+  if (startButton) {
+    startButton.disabled = true;
+    startButton.textContent = "Starting...";
+  }
+
+  setStatus("Loading NovaVM...");
+  setMessage("Loading the emulator library.");
 
   try {
-    if (!window.V86) {
-      await new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = "./libv86.js";
-        script.onload = resolve;
-        script.onerror = () =>
-          reject(new Error("Could not load libv86.js. Check the file in GitHub."));
-        document.head.appendChild(script);
-      });
-    }
-
-    if (!window.V86) {
-      throw new Error("The V86 constructor was not found in libv86.js.");
-    }
-
-    if (!screenContainer.querySelector("canvas")) {
+    if (!screenContainer) {
       throw new Error(
-        "The screen container is missing its canvas. Check index.html."
+        "The screen_container element is missing from index.html."
       );
     }
 
-    placeholder.hidden = true;
+    await loadV86();
+
+    if (placeholder) placeholder.hidden = true;
     screenContainer.hidden = false;
 
-    const newEmulator = new window.V86({
-      wasm_path: "/NovaVM/v86.wasm",
+    setMessage("Starting KolibriOS. Please wait.");
+
+    const options = {
+      wasm_path: "./v86.wasm",
       memory_size: 128 * 1024 * 1024,
       vga_memory_size: 8 * 1024 * 1024,
       screen_container: screenContainer,
       bios: { url: "./seabios.bin" },
       vga_bios: { url: "./vgabios.bin" },
       fda: {
-        url: "/NovaVM/kolibrios-fda.img",
+        url: "./kolibrios-fda.img",
         async: false
       },
       boot_order: 0x231,
       autostart: true
-    });
+    };
 
-    emulator = newEmulator;
+    emulator = new window.V86(options);
 
     emulator.add_listener("emulator-started", () => {
-      status.textContent = "Virtual PC running";
-      message.textContent = "KolibriOS is starting.";
+      setStatus("Virtual PC running");
+      setMessage("KolibriOS is starting.");
     });
 
     emulator.add_listener("emulator-ready", () => {
-      status.textContent = "Emulator ready";
-      message.textContent = "NovaVM is ready.";
+      setStatus("Emulator ready");
+      setMessage("NovaVM is ready.");
+      if (startButton) startButton.textContent = "NovaVM Running";
     });
   } catch (error) {
     showError(error);
   } finally {
     loading = false;
-  }
-});
 
-fullscreenBtn?.addEventListener("click", async () => {
-  try {
+    if (!emulator && startButton) {
+      startButton.disabled = false;
+    }
+  }
+}
+
+if (startButton) {
+  startButton.addEventListener("click", bootNovaVM);
+} else {
+  console.error('NovaVM: Could not find the button with id="start".');
+}
+
+if (fullscreenBtn) {
+  fullscreenBtn.addEventListener("click", async () => {
     if (!emulator) {
-      message.textContent = "Boot NovaVM before using fullscreen.";
+      setMessage("Boot NovaVM before using fullscreen.");
       return;
     }
 
-    if (typeof emulator.screen_go_fullscreen === "function") {
-      emulator.screen_go_fullscreen();
-    } else if (vmContainer?.requestFullscreen) {
-      await vmContainer.requestFullscreen();
-    } else {
-      throw new Error("Fullscreen is not supported by this browser.");
+    try {
+      if (typeof emulator.screen_go_fullscreen === "function") {
+        emulator.screen_go_fullscreen();
+      } else if (vmContainer?.requestFullscreen) {
+        await vmContainer.requestFullscreen();
+      } else {
+        throw new Error("Fullscreen is not supported.");
+      }
+    } catch (error) {
+      setMessage("Fullscreen failed: " + error.message);
     }
-  } catch (error) {
-    console.error("Fullscreen error:", error);
-    message.textContent = "Fullscreen failed: " + error.message;
-  }
-});
+  });
+}
+
+if (mouseBtn) {
+  mouseBtn.addEventListener("click", () => {
+    if (!emulator) {
+      setMessage("Boot NovaVM before locking the mouse.");
+      return;
+    }
+
+    if (typeof emulator.lock_mouse === "function") {
+      emulator.lock_mouse();
+      setMessage("Mouse lock requested.");
+    } else {
+      setMessage("Mouse locking is not supported.");
+    }
+  });
+}
 
 document.addEventListener("fullscreenchange", () => {
   if (fullscreenBtn) {
@@ -115,27 +187,5 @@ document.addEventListener("fullscreenchange", () => {
   }
 });
 
-mouseBtn?.addEventListener("click", () => {
-  if (!emulator) {
-    message.textContent = "Boot NovaVM before locking the mouse.";
-    return;
-  }
-
-  if (typeof emulator.lock_mouse === "function") {
-    emulator.lock_mouse();
-    message.textContent = "Mouse lock requested.";
-  } else {
-    message.textContent = "Mouse locking is not supported by this v86 build.";
-  }
-});
-
-window.addEventListener("error", (event) => {
-  console.error("NovaVM page error:", event.message);
-});
-
-window.addEventListener("unhandledrejection", (event) => {
-  console.error("NovaVM loading error:", event.reason);
-  message.textContent =
-    "Loading error: " +
-    (event.reason?.message || String(event.reason));
-});
+console.log("NovaVM: vm.js loaded.");
+console.log("NovaVM: Boot button found:", !!startButton);
