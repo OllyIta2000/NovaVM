@@ -1,6 +1,7 @@
 ```javascript
 const startButton = document.getElementById("start");
 const fullscreenBtn = document.getElementById("fullscreenBtn");
+const mouseBtn = document.getElementById("mouseBtn");
 const status = document.getElementById("status");
 const message = document.getElementById("message");
 const placeholder = document.getElementById("placeholder");
@@ -10,37 +11,48 @@ const vmContainer = document.getElementById("vm");
 let emulator = null;
 let loading = false;
 
-// Fullscreen using the browser's fullscreen API.
 fullscreenBtn.addEventListener("click", async () => {
   try {
-    if (document.fullscreenElement) {
-      await document.exitFullscreen();
+    if (!emulator) {
+      message.textContent = "Boot NovaVM before using fullscreen.";
+      return;
+    }
+
+    if (typeof emulator.screen_go_fullscreen === "function") {
+      emulator.screen_go_fullscreen();
     } else {
       await vmContainer.requestFullscreen();
     }
   } catch (error) {
     console.error("Fullscreen error:", error);
-    message.textContent =
-      "Fullscreen failed. Try refreshing the page and clicking again.";
+    message.textContent = "Fullscreen failed: " + error.message;
   }
 });
 
 document.addEventListener("fullscreenchange", () => {
   fullscreenBtn.textContent = document.fullscreenElement
-    ? "✕ Exit Fullscreen"
+    ? "Exit Fullscreen"
     : "⛶ Fullscreen";
 });
 
-// Ask the browser to capture the mouse when the VM is clicked.
-screenContainer.addEventListener("click", () => {
-  if (!emulator) return;
+mouseBtn.addEventListener("click", () => {
+  if (!emulator) {
+    message.textContent = "Boot NovaVM before locking the mouse.";
+    return;
+  }
 
   try {
     if (typeof emulator.lock_mouse === "function") {
       emulator.lock_mouse();
+      message.textContent =
+        "Mouse lock requested. Your browser may require permission.";
+    } else {
+      message.textContent =
+        "Mouse locking is not supported by this v86 build.";
     }
   } catch (error) {
-    console.warn("Mouse lock unavailable:", error);
+    console.error("Mouse lock error:", error);
+    message.textContent = "Mouse lock failed: " + error.message;
   }
 });
 
@@ -88,13 +100,12 @@ startButton.addEventListener("click", async () => {
 
     emulator.add_listener("emulator-started", () => {
       status.textContent = "Virtual PC running";
-      message.textContent =
-        "KolibriOS is starting. Click inside the screen to use the mouse.";
+      message.textContent = "KolibriOS is starting.";
     });
 
     emulator.add_listener("emulator-ready", () => {
       status.textContent = "Emulator ready";
-      message.textContent = "Your virtual PC is ready.";
+      message.textContent = "NovaVM is ready.";
     });
 
   } catch (error) {
