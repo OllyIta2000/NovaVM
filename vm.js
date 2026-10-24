@@ -42,8 +42,8 @@ startButton.addEventListener("click", async () => {
       screen_container: screenContainer,
       bios: { url: "./seabios.bin" },
       vga_bios: { url: "./vgabios.bin" },
-      cdrom: {
-        url: "https://i.copy.sh/linux.iso",
+      hda: {
+        url: "/NovaVM/kolibri.img",
         async: false
       },
       autostart: true
