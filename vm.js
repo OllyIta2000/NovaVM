@@ -14,63 +14,49 @@ startButton.addEventListener("click", async () => {
   loading = true;
   startButton.disabled = true;
   status.textContent = "Loading emulator...";
-  message.textContent = "Loading the virtual PC runtime. This may take a while.";
+  message.textContent = "Preparing NovaVM...";
 
   try {
     if (!window.V86) {
       await new Promise((resolve, reject) => {
         const script = document.createElement("script");
-        script.src = "https://copy.sh/v86/build/libv86.js";
+        script.src = "./libv86.js";
         script.onload = resolve;
-        script.onerror = () => reject(
-          new Error("Could not load the emulator library.")
-        );
+        script.onerror = () =>
+          reject(new Error("Could not load local libv86.js."));
         document.head.appendChild(script);
       });
     }
 
-    status.textContent = "Starting Linux...";
     placeholder.hidden = true;
     screenContainer.hidden = false;
+    status.textContent = "Starting virtual PC...";
 
     emulator = new window.V86({
-      wasm_path: "https://copy.sh/v86/build/v86.wasm",
+      wasm_path: "./",
       memory_size: 128 * 1024 * 1024,
       vga_memory_size: 8 * 1024 * 1024,
       screen_container: screenContainer,
-      bios: {
-        url: "https://copy.sh/v86/bios/seabios.bin"
-      },
-      vga_bios: {
-        url: "https://copy.sh/v86/bios/vgabios.bin"
-      },
-      cdrom: {
-        url: "https://copy.sh/v86/images/linux.iso"
-      },
-      autostart: true
+      bios: { url: "./seabios.bin" },
+      vga_bios: { url: "./vgabios.bin" },
+      autostart: false
     });
 
     emulator.add_listener("emulator-ready", () => {
-      status.textContent = "Virtual PC running";
-    });
-
-    emulator.add_listener("emulator-started", () => {
-      status.textContent = "Linux booting...";
+      status.textContent = "Emulator ready";
+      message.textContent =
+        "The emulator is ready, but a Linux disk image is still needed.";
     });
 
   } catch (error) {
     console.error("NovaVM error:", error);
-
     emulator = null;
     placeholder.hidden = false;
     screenContainer.hidden = true;
     status.textContent = "Startup failed";
-    message.textContent =
-      error.message +
-      " Check your connection, then try again.";
-
-    startButton.textContent = "Retry boot";
+    message.textContent = error.message;
     startButton.disabled = false;
+    startButton.textContent = "Retry boot";
   } finally {
     loading = false;
   }
