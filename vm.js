@@ -1,21 +1,35 @@
-
+```javascript
 const startButton = document.getElementById("start");
+const fullscreenBtn = document.getElementById("fullscreenBtn");
 const status = document.getElementById("status");
 const message = document.getElementById("message");
 const placeholder = document.getElementById("placeholder");
 const screenContainer = document.getElementById("screen_container");
-const fullscreenBtn = document.getElementById("fullscreenBtn");
-
-fullscreenBtn.addEventListener("click", async () => {
-  try {
-    await screenContainer.requestFullscreen();
-  } catch (error) {
-    console.error("Fullscreen failed:", error);
-  }
-});
+const vmContainer = document.getElementById("vm");
 
 let emulator = null;
 let loading = false;
+
+// Fullscreen includes the virtual PC and its controls.
+fullscreenBtn.addEventListener("click", async () => {
+  try {
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else {
+      await vmContainer.requestFullscreen();
+    }
+  } catch (error) {
+    console.error("NovaVM fullscreen error:", error);
+    message.textContent =
+      "Fullscreen was blocked by your browser. Try clicking again.";
+  }
+});
+
+document.addEventListener("fullscreenchange", () => {
+  fullscreenBtn.textContent = document.fullscreenElement
+    ? "✕ Exit Fullscreen"
+    : "⛶ Fullscreen";
+});
 
 startButton.addEventListener("click", async () => {
   if (loading || emulator) return;
@@ -23,7 +37,7 @@ startButton.addEventListener("click", async () => {
   loading = true;
   startButton.disabled = true;
   status.textContent = "Loading NovaVM...";
-  message.textContent = "Preparing the virtual PC.";
+  message.textContent = "Preparing KolibriOS.";
 
   try {
     if (!window.V86) {
@@ -61,11 +75,12 @@ startButton.addEventListener("click", async () => {
 
     emulator.add_listener("emulator-started", () => {
       status.textContent = "Virtual PC running";
-      message.textContent = "NovaVM is starting Linux...";
+      message.textContent = "KolibriOS is starting.";
     });
 
     emulator.add_listener("emulator-ready", () => {
       status.textContent = "Emulator ready";
+      message.textContent = "Your virtual PC is ready to use.";
     });
 
   } catch (error) {
@@ -81,3 +96,4 @@ startButton.addEventListener("click", async () => {
     loading = false;
   }
 });
+```
