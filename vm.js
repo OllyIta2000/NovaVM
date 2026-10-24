@@ -4,6 +4,15 @@ const status = document.getElementById("status");
 const message = document.getElementById("message");
 const placeholder = document.getElementById("placeholder");
 const screenContainer = document.getElementById("screen_container");
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+
+fullscreenBtn.addEventListener("click", async () => {
+  try {
+    await screenContainer.requestFullscreen();
+  } catch (error) {
+    console.error("Fullscreen failed:", error);
+  }
+});
 
 let emulator = null;
 let loading = false;
