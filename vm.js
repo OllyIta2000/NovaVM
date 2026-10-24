@@ -33,7 +33,7 @@ startButton.addEventListener("click", async () => {
     status.textContent = "Starting virtual PC...";
 
     emulator = new window.V86({
-      wasm_path: "./v86.wasm",
+      wasm_path: "/NovaVM/v86.wasm",
       memory_size: 128 * 1024 * 1024,
       vga_memory_size: 8 * 1024 * 1024,
       screen_container: screenContainer,
